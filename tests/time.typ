@@ -4,6 +4,8 @@
 = Date
 #datetime_norm_rfc3339("251025")
 
+#datetime_parse(251025)
+
 #datetime_parse("251025")
 
 = Date time
