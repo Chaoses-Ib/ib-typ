@@ -1,0 +1,8 @@
+[package]
+name = "ib"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Chaoses-Ib"]
+license = "MIT"
+description = "A meta Typst package."
+repository = "https://github.com/Chaoses-Ib/ib-typ"
