@@ -11,6 +11,7 @@
   red: rgb("#e84c22"),
   salmon: rgb("#ff513e"),
   orange: rgb("#ed7d31"),
+  gold: rgb("#ffc000"),
   green: rgb("#00b050"),
   blue: rgb("#00b0f0"),
   purple: rgb("#8064a2"),
@@ -21,6 +22,7 @@
 #let red = dye.with(one.red)
 #let salmon = dye.with(one.salmon)
 #let orange = dye.with(one.orange)
+#let gold = dye.with(one.gold)
 #let green = dye.with(one.green)
 #let blue = dye.with(one.blue)
 #let purple = dye.with(one.purple)
@@ -29,3 +31,5 @@
 
 #let color = color
 #import "@preview/splash:0.5.0": *
+
+#let yellow = dye.with(tailwind.yellow-400)

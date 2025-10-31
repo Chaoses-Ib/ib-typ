@@ -3,6 +3,7 @@
 #import "badge.typ": *
 #import "color.typ"
 #import "color.typ": Red, red, salmon, orange, green, blue, purple, Purple, gray
+#import "color.typ": gold, yellow
 #import "time.typ"
 #import "time.typ": t
 #import "www.typ": *
