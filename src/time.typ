@@ -9,7 +9,8 @@
     m => "20" + m.captures.at(0) + "-" + m.captures.at(1) + "-" + m.captures.at(2)
   )
   .replace(" ", "T")
-  .replace(regex(`[^:]\d\d:\d\d$`.text), m => m.text + ":00")
+  // .replace(regex(`[^:]\d\d:\d\d$`.text), m => m.text + ":00")
+  .replace(regex(`([^:+-]\d\d:\d\d)($|[Z+-])`.text), m => m.captures.at(0) + ":00" + m.captures.at(1))
 }
 
 /// - s (str, int):
@@ -20,22 +21,38 @@
 }
 
 /// - d (datetime):
+/// - offset (none, int, str): Time offset
 /// -> str
-#let datetime_format(d) = {
+#let datetime_format(d, offset: none) = {
+  if type(offset) == int {
+    offset = if offset > 0 {
+      "+" + str(offset)
+    } else {
+      str(offset)
+    }
+  }
   if d.minute() == none {
     d.display("[year]-[month]-[day]")
   } else {
     d.display("[year]-[month]-[day] [hour]:[minute]")
-  }
+  } + offset
 }
 
 #import "@preview/badgery:0.1.1"
 
-/// #example(`t(251025)`)
-/// #example(`t("251025")`)
-/// #example(`t("251025 00:26")`)
-/// #example(`t("2025-10-25 00:26")`)
-/// #example(`t("2025-10-25T00:26:00")`)
+/// #example(`#t(251025)`)
+/// #example(`#t("251025")`)
+/// #example(`#t("251025 00:26")`)
+/// #example(`#t("2025-10-25 00:26")`)
+/// #example(`#t("2025-10-25T00:26:00")`)
+/// #example(`#t("2025-10-25 00:26", offset: -5)`)
+/// #example(`#t("2025-10-25 00:26", offset: 8, body: [CHANGE])`)
 /// 
 /// - s (str, int):
-#let t(s) = badgery.badge-gray(datetime_format(datetime_parse(s)))
+/// - offset (none, int, str): Time offset
+/// - body (none, str, content):
+#let t(s, offset: none, body: none) = {
+  badgery.badge-gray([
+    #datetime_format(datetime_parse(s), offset: offset) #body
+  ])
+}
