@@ -9,7 +9,8 @@
 #let one = (
   Red: rgb("#ff0000"),
   red: rgb("#e84c22"),
-  salmon: rgb("#ff513e"),
+  salmon-450: rgb("#ff513e"),
+  salmon: rgb("#fa8072"),
   orange: rgb("#ed7d31"),
   gold: rgb("#ffc000"),
   green: rgb("#00b050"),
