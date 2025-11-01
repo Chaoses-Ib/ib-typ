@@ -13,6 +13,18 @@
 
 /// - url (str):
 /// - body (content):
+#let steam(url, body: [Steam]) = [
+  #badge-blue[#link(url, body)]
+]
+
+/// - url (str):
+/// - body (content):
+#let dlsite(url, body: [DLsite]) = [
+  #badge-blue[#link(url, body)]
+]
+
+/// - url (str):
+/// - body (content):
 #let bangumi(url, body: [Bangumi]) = [
   #badge-red[#link(url, body)]
 ]
