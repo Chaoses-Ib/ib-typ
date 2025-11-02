@@ -5,6 +5,12 @@
 #import "color.typ": Red, red, salmon, orange, green, blue, purple, Purple, gray
 #import "color.typ": gold, yellow
 #import "color.typ": green-light
+#import "list.typ" as lists
 #import "time.typ"
 #import "time.typ": t
 #import "www.typ": *
+
+#let ib(it) = {
+  show: lists.checklist
+  it
+}
