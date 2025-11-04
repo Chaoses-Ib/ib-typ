@@ -5,7 +5,7 @@
   body
 }
 
-/// OneNote colors
+/// OneNote-based colors
 /// - Readability
 #let one = (
   Red: rgb("#ff0000"),
@@ -17,6 +17,7 @@
   green: rgb("#00b050"),
   green-light: rgb("#90d090"),
   blue: rgb("#00b0f0"),
+  purple-light: rgb("#817FA9"),
   purple: rgb("#8064a2"),
   Purple: rgb("#7030a0"),
   gray: rgb("#757070"),
@@ -29,6 +30,7 @@
 #let green = dye.with(one.green)
 #let green-light = dye.with(one.green-light)
 #let blue = dye.with(one.blue)
+#let purple-light = dye.with(one.purple-light)
 #let purple = dye.with(one.purple)
 #let Purple = dye.with(one.Purple)
 #let gray = dye.with(one.gray)
