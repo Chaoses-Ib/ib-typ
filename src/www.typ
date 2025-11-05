@@ -1,4 +1,5 @@
 #import "badge.typ": *
+#import "icon.typ"
 
 /// - body (content):
 #let ai(body: [AI]) = [
@@ -10,6 +11,15 @@
 #let wikipedia(url, body: [Wikipedia]) = [
   #badge-gray[#link(url, body)]
 ]
+
+/// - url (str):
+/// - body (content):
+#let github(url, body: [GitHub]) = {
+  badge-gray[
+    #box(icon.simple("github"))
+    #link(url, body)
+  ]
+}
 
 /// - url (str):
 /// - body (content):

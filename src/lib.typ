@@ -7,6 +7,7 @@
 #import "color.typ": gold, yellow
 #import "color.typ": green-light
 #import "color.typ": purple-light
+#import "icon.typ"
 #import "list.typ" as lists
 #import "time.typ"
 #import "time.typ": t
