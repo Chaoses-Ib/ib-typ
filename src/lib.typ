@@ -3,10 +3,18 @@
 #import "badge.typ": *
 #import "code.typ"
 #import "color.typ"
-#import "color.typ": Red, red, salmon, orange, green, blue, purple, Purple, gray
-#import "color.typ": gold, yellow
-#import "color.typ": green-light
-#import "color.typ": purple-light
+#import "color.typ": (
+  Red, red,
+  salmon,
+  orange,
+  gold, yellow,
+  green, green-light, 
+  blue,
+  purple-light, purple, Purple,
+  gray,
+  black,
+  white,
+)
 #import "icon.typ"
 #import "link.typ" as links
 #import "link.typ": (
