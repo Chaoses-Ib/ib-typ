@@ -1,5 +1,6 @@
 #import "badge.typ": *
 #import "icon.typ"
+#import "uri.typ": host-ancestors
 
 /// - body (content):
 #let ai(body: [AI]) = [
@@ -38,3 +39,22 @@
 #let bangumi(url, body: [Bangumi]) = [
   #badge-red[#link(url, body)]
 ]
+
+#let HOST-BADGE = (
+  "wikipedia.org": wikipedia,
+  "github.com": github,
+  "steampowered.com": steam,
+  "dlsite.com": dlsite,
+  "bangumi.tv": bangumi,
+  "bgm.tv": bangumi,
+)
+
+/// - host (str):
+/// -> function, none
+#let host-badge(host) = {
+  for host in host-ancestors(host) {
+    if host in HOST-BADGE {
+      return HOST-BADGE.at(host)
+    }
+  }
+} 

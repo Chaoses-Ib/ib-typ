@@ -9,12 +9,23 @@
 #import "color.typ": purple-light
 #import "icon.typ"
 #import "link.typ" as links
-#import "link.typ": a
+#import "link.typ": (
+  a,
+  a-badge,
+)
 #import "list.typ" as lists
 #import "time.typ"
 #import "time.typ": t
+#import "uri.typ"
 #import "util.typ"
-#import "www.typ": *
+#import "www.typ": (
+  ai,
+  wikipedia,
+  github,
+  steam,
+  dlsite,
+  bangumi,
+)
 
 #let ib(it) = {
   show: lists.checklist

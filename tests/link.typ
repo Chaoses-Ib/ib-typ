@@ -19,3 +19,6 @@
 #link(<unicode>)[→Unicode]
 
 #a([→Unicode], <unicode>)
+
+= Badge
+See #link("www.typ").
