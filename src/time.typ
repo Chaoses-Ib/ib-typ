@@ -1,9 +1,12 @@
-/// - s (str, int):
+#import "util.typ": to-string
+
+/// - s (str, int, content):
 /// -> s
 #let datetime_norm_rfc3339(s) = {
-  if type(s) == int {
-    s = str(s)
-  }
+  // if type(s) == int {
+  //   s = str(s)
+  // }
+  s = to-string(s)
   s.replace(regex(`^(\d\d)(\d\d)(\d\d)`.text),
     // 20$1-$2-$3
     m => "20" + m.captures.at(0) + "-" + m.captures.at(1) + "-" + m.captures.at(2)
@@ -14,7 +17,7 @@
   .replace(regex(`([^:+-]\d\d:\d\d)($|[Z+-])`.text), m => m.captures.at(0) + ":00" + m.captures.at(1))
 }
 
-/// - s (str, int):
+/// - s (str, int, content):
 /// -> datetime
 #let datetime_parse(s) = {
   // TODO: https://github.com/typst/typst/issues/4107
@@ -43,16 +46,27 @@
 
 #import "@preview/badgery:0.1.1"
 
+/// == Content style
+/// #example(`#t[251025]`)
+/// #example(`#t[16:00]`)
+/// #example(`#t[251025 00:26]`)
+/// #example(`#t[2025-10-25 00:26]`)
+/// #example(`#t[2025-10-25T00:26:00]`)
+/// 
+/// == String style
 /// #example(`#t(251025)`)
 /// #example(`#t("251025")`)
 /// #example(`#t("16:00")`)
 /// #example(`#t("251025 00:26")`)
 /// #example(`#t("2025-10-25 00:26")`)
 /// #example(`#t("2025-10-25T00:26:00")`)
+/// 
+/// == With args
+/// #example(`#t([2025-10-25 00:26], offset: -5)`)
 /// #example(`#t("2025-10-25 00:26", offset: -5)`)
 /// #example(`#t("2025-10-25 00:26", offset: 8, body: [CHANGE])`)
 /// 
-/// - s (str, int):
+/// - s (str, int, content):
 /// - offset (none, int, str): Time offset
 /// - body (none, str, content):
 #let t(s, offset: none, body: none) = {
