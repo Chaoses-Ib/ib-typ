@@ -8,6 +8,7 @@
     // 20$1-$2-$3
     m => "20" + m.captures.at(0) + "-" + m.captures.at(1) + "-" + m.captures.at(2)
   )
+  .replace(regex(`^\d\d:`.text), m => "0000-01-01T" + m.text)
   .replace(" ", "T")
   // .replace(regex(`[^:]\d\d:\d\d$`.text), m => m.text + ":00")
   .replace(regex(`([^:+-]\d\d:\d\d)($|[Z+-])`.text), m => m.captures.at(0) + ":00" + m.captures.at(1))
@@ -33,6 +34,8 @@
   }
   if d.minute() == none {
     d.display("[year]-[month]-[day]")
+  } else if d.year() == 0  {
+    d.display("[hour]:[minute]")
   } else {
     d.display("[year]-[month]-[day] [hour]:[minute]")
   } + offset
@@ -42,6 +45,7 @@
 
 /// #example(`#t(251025)`)
 /// #example(`#t("251025")`)
+/// #example(`#t("16:00")`)
 /// #example(`#t("251025 00:26")`)
 /// #example(`#t("2025-10-25 00:26")`)
 /// #example(`#t("2025-10-25T00:26:00")`)
