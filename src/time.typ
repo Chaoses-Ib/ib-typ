@@ -11,6 +11,8 @@
     // 20$1-$2-$3
     m => "20" + m.captures.at(0) + "-" + m.captures.at(1) + "-" + m.captures.at(2)
   )
+  // Prefix leading zero to hour
+  .replace(regex(`(^|[^\d:+-])(\d:)`.text), m => m.captures.at(0) + "0" + m.captures.at(1))
   .replace(regex(`^\d\d:`.text), m => "0000-01-01T" + m.text)
   .replace(" ", "T")
   // .replace(regex(`[^:]\d\d:\d\d$`.text), m => m.text + ":00")
@@ -77,6 +79,7 @@
 /// #example(`#t[2510]`)
 /// #example(`#t[251025]`)
 /// #example(`#t[16:00]`)
+/// #example(`#t[251025 0:26]`)
 /// #example(`#t[251025 00:26]`)
 /// #example(`#t[2025-10-25 00:26]`)
 /// #example(`#t[2025-10-25T00:26:00]`)
