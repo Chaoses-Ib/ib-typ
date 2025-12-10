@@ -19,15 +19,41 @@
 
 /// - s (str, int, content):
 /// -> datetime
-#let datetime_parse(s) = {
+#let datetime_parse(s, yymm: false) = {
+  s = to-string(s)
+  if yymm {
+    let d = int(s)
+    if s.len() == 2 {
+      return datetime(year: 2000 + d, month: 1, day: 1)
+    } else if s.len() == 4 {
+      return datetime(
+        year: 2000 + calc.div-euclid(d, 100),
+        month: calc.rem(d, 100),
+        day: 1
+      )
+    }
+  }
   // TODO: https://github.com/typst/typst/issues/4107
   toml(bytes("d=" + datetime_norm_rfc3339(s))).d
 }
 
-/// - d (datetime):
+/// - d (datetime, int):
 /// - offset (none, int, str): Time offset
 /// -> str
 #let datetime_format(d, offset: none) = {
+  if type(d) == int {
+    // yymm date
+    if d < 100 {
+      return datetime(year: 2000 + d, month: 1, day: 1)
+        .display("[year]")
+    } else if d < 10000 {
+      return datetime(
+        year: 2000 + calc.div-euclid(d, 100),
+        month: calc.rem(d, 100),
+        day: 1
+      ).display("[year]-[month]")
+    }
+  }
   if type(offset) == int {
     offset = if offset > 0 {
       "+" + str(offset)
@@ -47,6 +73,8 @@
 #import "@preview/badgery:0.1.1"
 
 /// == Content style
+/// #example(`#t[25]`)
+/// #example(`#t[2510]`)
 /// #example(`#t[251025]`)
 /// #example(`#t[16:00]`)
 /// #example(`#t[251025 00:26]`)

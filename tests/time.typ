@@ -8,6 +8,10 @@
 
 #datetime_parse("251025")
 
+== yymm
+#datetime_parse(25, yymm: true) \
+#datetime_parse(2510, yymm: true) \
+
 = Date time
 #datetime_norm_rfc3339("251025 00:26:00")
 
@@ -29,6 +33,10 @@
 #datetime_parse("2025-10-25T00:26:00")
 
 = Format
+#t[25] \
+#t[2510] \
+
+#t[251025]
 #t[2025-10-25]
 #t("2025-10-25")
 
