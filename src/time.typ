@@ -1,4 +1,5 @@
 #import "util.typ": to-string
+#import "layouts.typ"
 
 /// - s (str, int, content):
 /// -> s
@@ -74,6 +75,8 @@
 
 #import "@preview/badgery:0.1.1"
 
+/// Time stamp/mark.
+/// 
 /// == Content style
 /// #example(`#t[25]`)
 /// #example(`#t[2510]`)
@@ -104,4 +107,25 @@
   badgery.badge-gray([
     #datetime_format(datetime_parse(s), offset: offset) #body
   ])
+}
+
+/// Time block for non-linear time series.
+/// 
+/// #example(`#t-block[251214][test]`)
+/// #example(`#t-block(fill: yellow)[251214][test]`)
+#let t-block(
+  s,
+  offset: none,
+  header: none,
+  body,
+  ..args
+) = {
+  layouts.block-slot(
+    header: t(s, offset: offset, body: header),
+    body,
+    fill: luma(245),
+    radius: 2pt,
+    stroke: luma(235),
+    ..args
+  )
 }

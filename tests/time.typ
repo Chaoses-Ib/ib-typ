@@ -59,3 +59,15 @@
 
 #t([2025-10-25 00:26], offset: 8, body: [CHANGE])
 #t("2025-10-25 00:26", offset: 8, body: [CHANGE])
+
+= Time block
+#t[251214]test
+
+#t-block[251214][test]
+#t-block(fill: yellow)[251214][test]
+
+#t-block[251214][
+test
+
+#t-block[251215][#lorem(10)]
+]

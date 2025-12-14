@@ -22,8 +22,12 @@
   a-badge,
 )
 #import "list.typ" as lists
+#import "layouts.typ"
 #import "time.typ"
-#import "time.typ": t
+#import "time.typ": (
+  t,
+  t-block,
+)
 #import "uri.typ"
 #import "util.typ"
 #import "www.typ": (
