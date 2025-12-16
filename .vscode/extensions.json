@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "myriad-dreamin.tinymist",
+        // https://github.com/Myriad-Dreamin/tinymist/issues/2207
+        "telesoho.vscode-markdown-paste-image",
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "MarkdownPaste.lang_rules": [
+        {
+            // https://github.com/Chaoses-Ib/ib-typ/blob/main/.vscode/settings.json
+            "typst": [
+                {
+                    // Normalize spaces
+                    "regex": " ",
+                    "options": "g",
+                    "replace": " "
+                },
+                {
+                    // Do not escape ` (in links)
+                    "regex": "\\\\`",
+                    "options": "g",
+                    "replace": "`"
+                },
+                {
+                    // Deduplicate whole/inline link text and title
+                    "regex": "\\[(.*?)\\]\\(<?(.+?)>?( \"\\1\")\\)",
+                    "options": "g",
+                    "replace": "#a[$1][$2]"
+                },
+                {
+                    // Whole links
+                    "regex": "^\\[(.*?)\\]\\(<?(.+)>?( \".*?\")?\\)$",
+                    "options": "m",
+                    "replace": "#a[$1$3][$2]"
+                },
+                {
+                    // Inline links
+                    // TODO: Parentheses are allowed without escaping, as long as they are balanced
+                    "regex": "\\[(.*?)\\]\\(<?(.+?)>?( \".*?\")?\\)",
+                    "options": "g",
+                    "replace": "#a[$1$3][$2]"
+                },
+            ]
+        }
+    ]
+}
