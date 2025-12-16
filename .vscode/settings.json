@@ -1,4 +1,5 @@
 {
+    "MarkdownPaste.applyAllRules": true,
     "MarkdownPaste.lang_rules": [
         {
             // https://github.com/Chaoses-Ib/ib-typ/blob/main/.vscode/settings.json
