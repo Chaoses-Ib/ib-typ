@@ -60,6 +60,15 @@
 #t([2025-10-25 00:26], offset: 8, body: [CHANGE])
 #t("2025-10-25 00:26", offset: 8, body: [CHANGE])
 
+== Short date
+dd: #t[31] \
+mmdd: #t[1011] \
+yymm: #t[2510] \
+
+dd: #t[31 3:59] \
+mmdd: #t[1011 3:59] \
+yymm: #t[2510 3:59] \
+
 = Time block
 #t[251214]test
 

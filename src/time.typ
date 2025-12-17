@@ -40,7 +40,7 @@
   toml(bytes("d=" + datetime_norm_rfc3339(s))).d
 }
 
-/// - d (datetime, int):
+/// - d (datetime, int, str, content):
 /// - offset (none, int, str): Time offset
 /// - f(str): Preferred (short) date format
 /// -> str
@@ -79,7 +79,21 @@
         day: 1
       ).display("[year]-[month]")
     }
+  } else if type(d) != datetime {
+    d = to-string(d)
+
+    // Short date with time
+    let m = d.match(regex(`^(?:\d\d|\d{4}) `.text))
+    if m != none {
+      let date = m.text.slice(0, -1)
+      let time = d.slice(m.end)
+      return datetime_format(date) + " " + datetime_format(time)
+    }
+
+    // May be int
+    return datetime_format(datetime_parse(d))
   }
+
   if type(offset) == int {
     offset = if offset > 0 {
       "+" + str(offset)
@@ -105,6 +119,7 @@
 /// #example(`#t[2510]`)
 /// #example(`#t[251025]`)
 /// #example(`#t[16:00]`)
+/// #example(`#t[1025 0:26]`)
 /// #example(`#t[251025 0:26]`)
 /// #example(`#t[251025 00:26]`)
 /// #example(`#t[2025-10-25 00:26]`)
@@ -128,7 +143,7 @@
 /// - body (none, str, content):
 #let t(s, offset: none, body: none) = {
   badgery.badge-gray([
-    #datetime_format(datetime_parse(s), offset: offset) #body
+    #datetime_format(s, offset: offset) #body
   ])
 }
 
