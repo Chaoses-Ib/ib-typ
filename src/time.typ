@@ -42,9 +42,32 @@
 
 /// - d (datetime, int):
 /// - offset (none, int, str): Time offset
+/// - f(str): Preferred (short) date format
 /// -> str
-#let datetime_format(d, offset: none) = {
+#let datetime_format(
+  d,
+  offset: none,
+  f: "mmdd",
+) = {
   if type(d) == int {
+    let r100 = calc.rem(d, 100)
+    // Prefer mmdd date
+    if (f == "mmdd" and d < 1300 and (d >= 100 or d <= 31)
+      or r100 > 12
+    ) {
+      // mmdd date
+      if d < 100 {
+        return datetime(year: 0, month: 1, day: d)
+          .display("[day]")
+      } else if d < 10000 {
+        return datetime(
+          year: 0,
+          month: calc.div-euclid(d, 100),
+          day: r100
+        ).display("[month]-[day]")
+      }
+    }
+
     // yymm date
     if d < 100 {
       return datetime(year: 2000 + d, month: 1, day: 1)
