@@ -17,6 +17,22 @@
                     "replace": "`"
                 },
                 {
+                    // Escape #, @, $, ~ in links
+                    // < is not escaped as it's usually used in code.
+                    // document.title = '* _ ` < > @ = - + / $ \\ \' " ~ --- #'
+                    // TODO: Don't escape in code block
+                    "regex": "[#@$~](?=.*?\\]\\()",
+                    "options": "g",
+                    // https://github.com/telesoho/vscode-markdown-paste-image/issues/144
+                    "replace": "\\$&"
+                },
+                {
+                    // Turn <> in links into code blocks
+                    "regex": "[\\x21-\\x7e]*<[\\x21-\\x7e]*>[\\x21-\\x7e]*(?=.*?\\]\\()",
+                    "options": "g",
+                    "replace": "`$&`"
+                },
+                {
                     // Deduplicate whole/inline link text and title
                     "regex": "\\[(.*?)\\]\\(<?(.+?)>?( \"\\1\")\\)",
                     "options": "g",
