@@ -1,0 +1,24 @@
+[package]
+name = "ib-typ"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["wasm"]
+wasm = [
+    "dep:wasm-minimal-protocol",
+    "dep:ciborium",
+    "dep:typwire",
+]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1"
+ciborium = { version = "0.2", optional = true }
+minijinja = "2.14"
+nop-macros = "0.2"
+serde = { version = "1", features = ["derive"] }
+typwire = { version = "0.1", optional = true }
+wasm-minimal-protocol = { version = "0.1", optional = true }

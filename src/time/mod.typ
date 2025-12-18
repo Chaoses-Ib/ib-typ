@@ -1,5 +1,7 @@
-#import "util.typ": to-string
-#import "layouts.typ"
+#import "../util.typ": to-string
+#import "../layouts.typ"
+
+#import "duration.typ": *
 
 /// - s (str, int, content):
 /// -> s

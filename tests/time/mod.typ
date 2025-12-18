@@ -1,4 +1,4 @@
-#import "../src/lib.typ": time
+#import "../../src/lib.typ": time
 #import time: *
 
 = Date

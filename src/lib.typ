@@ -23,8 +23,8 @@
 )
 #import "list.typ" as lists
 #import "layouts.typ"
-#import "time.typ"
-#import "time.typ": (
+#import "time/mod.typ" as time
+#import "time/mod.typ": (
   t,
   t-block,
 )

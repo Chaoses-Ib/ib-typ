@@ -1,3 +1,5 @@
+#let plugin = plugin("ib_typ.wasm")
+
 /// Usage:
 /// - Trailing `str` arguments
 /// 
