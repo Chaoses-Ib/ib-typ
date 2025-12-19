@@ -27,6 +27,13 @@
                     "replace": "\\$&"
                 },
                 {
+                    // Escape // in links
+                    // e.g. https://www.youtube.com/watch?v=6tsNbrUSWuc
+                    "regex": "//(?=.*?\\]\\()",
+                    "options": "g",
+                    "replace": "\\//"
+                },
+                {
                     // Turn <> in links into code blocks
                     "regex": "[\\x21-\\x7e]*<[\\x21-\\x7e]*>[\\x21-\\x7e]*(?=.*?\\]\\()",
                     "options": "g",
