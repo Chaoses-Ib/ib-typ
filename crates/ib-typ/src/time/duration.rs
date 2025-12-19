@@ -46,6 +46,8 @@ pub fn duration_format(d: DurationEval) -> DurationFormat {
     if d.approx {
         s += "~";
     }
+    // For round half up instead of to even
+    let secs = secs + 0.1;
     s += &if secs < 3.0 * 60.0 {
         format!("{:.0}", secs / 60.0)
     } else {
@@ -102,6 +104,12 @@ mod tests {
         assert_eq!(duration_eval_format_s("1h2")?, "1h");
         assert_eq!(duration_eval_format_s("1h3")?, "1.1h");
         assert_eq!(duration_eval_format_s("1h3.3")?, "1.1h");
+
+        // Round half up instead of to even
+        assert_eq!(duration_eval_format_s("0.5")?, "1");
+        assert_eq!(duration_eval_format_s("2h2.5")?, "2h");
+        assert_eq!(duration_eval_format_s("2h3")?, "2.1h");
+        assert_eq!(duration_eval_format_s("2.05h")?, "2.1h");
 
         assert_eq!(duration_eval_format_s("+1h2")?, "+1h");
         Ok(())
