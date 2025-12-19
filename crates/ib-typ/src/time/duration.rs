@@ -1,8 +1,71 @@
-use std::time::Duration;
+use std::{fmt::Write, time::Duration};
 
-use anyhow::Context;
+use anyhow::{Context, bail};
+use logos::Logos;
 use minijinja::{Environment, context};
 use serde::{Deserialize, Serialize};
+
+use crate::time::parse_time;
+
+#[derive(Logos, Clone, Copy, Debug, PartialEq)]
+pub enum DurationToken {
+    #[regex(r"\d+(?:\.\d+)?")]
+    Number,
+
+    #[regex(r"\d?\d:\d\d")]
+    Time,
+
+    #[token("~")]
+    Approx,
+
+    #[token("+")]
+    Plus,
+
+    #[token("-")]
+    Minus,
+
+    #[regex(r"[^\d~+-]")]
+    Other,
+}
+
+pub fn duration_eval_pre(pattern: &str) -> Result<String, anyhow::Error> {
+    let mut lex = DurationToken::lexer(&pattern);
+    let mut s = String::new();
+    while let Some(Ok(token)) = lex.next() {
+        // dbg!(token);
+        match token {
+            DurationToken::Time => {
+                let a = parse_time(lex.slice())?;
+                let op = lex.next().transpose().ok().flatten().context("op")?;
+                let mut b = || lex.next().transpose().ok().flatten().context("b");
+                match op {
+                    // Time range
+                    DurationToken::Minus | DurationToken::Approx => {
+                        match b()? {
+                            DurationToken::Time => {
+                                let b = parse_time(lex.slice())?;
+                                // let d = (b - a).total(jiff::Unit::Minute)?;
+                                let mut d = b.duration_since(a).as_mins();
+                                if d < 0 {
+                                    d += 24 * 60;
+                                }
+                                if let DurationToken::Approx = op {
+                                    s += "~";
+                                }
+                                write!(s, "{}", d)?;
+                            }
+                            _ => bail!("b"),
+                        }
+                    }
+                    _ => bail!("op"),
+                }
+            }
+            _ => s += lex.slice(),
+        }
+    }
+    s += lex.remainder();
+    Ok(s)
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DurationEval {
@@ -12,9 +75,10 @@ pub struct DurationEval {
 }
 
 pub fn duration_eval(s: &str) -> Result<DurationEval, anyhow::Error> {
+    let s = duration_eval_pre(s)?;
     let (s, plus) = {
         let e = s.strip_prefix("+");
-        (e.unwrap_or(s), e.is_some())
+        (e.unwrap_or(&s), e.is_some())
     };
     let approx = s.contains("~");
     let s = s.replace("~", "");
@@ -87,6 +151,22 @@ mod tests {
     use super::*;
 
     #[test]
+    fn duration_eval_pre_() -> anyhow::Result<()> {
+        // Time range
+        assert_eq!(duration_eval_pre("1+4:+2")?, "1+4:+2");
+
+        assert_eq!(duration_eval_pre("1+0:00-4:00+2")?, "1+240+2");
+        assert_eq!(duration_eval_pre("1+8:00-12:00+2")?, "1+240+2");
+        assert_eq!(duration_eval_pre("1+23:00-0:00+2")?, "1+60+2");
+        assert_eq!(duration_eval_pre("1+23:00-04:00+2")?, "1+300+2");
+        assert_eq!(duration_eval_pre("1+0:01-0:00+2")?, "1+1439+2");
+
+        assert_eq!(duration_eval_pre("1+8:00~12:00+2")?, "1+~240+2");
+        assert_eq!(duration_eval_pre("1+8:00~12:00*0.1+2")?, "1+~240*0.1+2");
+        Ok(())
+    }
+
+    #[test]
     fn duration_eval_() -> anyhow::Result<()> {
         assert_eq!(duration_eval("1h")?.d, Duration::from_mins(60));
         assert_eq!(duration_eval("1h3")?.d, Duration::from_mins(63));
@@ -112,6 +192,10 @@ mod tests {
         assert_eq!(duration_eval_format_s("2.05h")?, "2.1h");
 
         assert_eq!(duration_eval_format_s("+1h2")?, "+1h");
+
+        // Time range
+        assert_eq!(duration_eval_format_s("1+8:00~12:00*0.1+2")?, "~0.5h");
+
         Ok(())
     }
 }

@@ -17,6 +17,13 @@ crate-type = ["cdylib"]
 [dependencies]
 anyhow = "1"
 ciborium = { version = "0.2", optional = true }
+jiff = { version = "0.2", default-features = false, features = [
+    "std",
+    "perf-inline",
+] }
+logos = { version = "0.16", default-features = false, features = [
+    "export_derive"
+] }
 minijinja = "2.14"
 nop-macros = "0.2"
 serde = { version = "1", features = ["derive"] }
