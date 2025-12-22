@@ -27,3 +27,27 @@
     " "
   }
 }
+
+/// - v (int, bool, float, decimal, str, content):
+/// -> int, none
+#let to-int(
+  it,
+  default: none,
+) = {
+  let t = type(it)
+  if t == int {
+    it
+  } else if t == bool or t == float or t == decimal {
+    int(it)
+  } else if t == datetime {
+    default
+  } else if t == str {
+    if it.contains(regex(`^[0-9]+$`.text)) {
+      int(it)
+    } else {
+      default
+    }
+  } else {
+    to-int(to-string(it))
+  }
+}
