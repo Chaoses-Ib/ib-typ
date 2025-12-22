@@ -44,18 +44,22 @@
 
 /// - d (datetime, int, str, content):
 /// - offset (none, int, str): Time offset
-/// - f(str): Preferred (short) date format
+/// - f(str, none): Preferred (short) date format
 /// -> str
 #let datetime_format(
   d,
   offset: none,
-  f: "mmdd",
+  f: none,
 ) = {
   if type(d) == int {
+    if f == none {
+      f = "mmdd"
+    }
+
     let r100 = calc.rem(d, 100)
     // Prefer mmdd date
     if (f == "mmdd" and d < 1300 and (d >= 100 or d <= 31)
-      or r100 > 12
+      or (d >= 100 and r100 > 12)
     ) {
       // mmdd date
       if d < 100 {
@@ -83,6 +87,7 @@
     }
   } else if type(d) != datetime {
     d = to-string(d)
+    let datetime_format = datetime_format.with(offset: offset, f: f)
 
     // Short date with time
     let m = d.match(regex(`^(?:\d\d|\d{4}) `.text))
@@ -142,10 +147,17 @@
 /// 
 /// - s (str, int, content):
 /// - offset (none, int, str): Time offset
+/// - f(str, none): Preferred (short) date format
 /// - body (none, str, content):
-#let t(s, offset: none, body: none) = {
+#let t(
+  s,
+  offset: none,
+  f: none,
+  body: none,
+) = {
   badgery.badge-gray([
-    #datetime_format(s, offset: offset) #body
+    #datetime_format(s, offset: offset, f: f)
+    #body
   ])
 }
 
