@@ -1,3 +1,17 @@
+/// - Can only be used within `context`
+///   unless `body` is a str or raw block with line breaks.
+/// 
+/// - body (content, str):
+#let is-multiline(body) = {
+  if type(body) == str and body.contains("\n") {
+    return true
+  }
+  if type(body) == content and body.func() == raw {
+    return is-multiline(body.text)
+  }
+  measure(body).height >= measure([~\ ~]).height
+}
+
 /// Block with slots.
 #let block-slot(
   header: none,

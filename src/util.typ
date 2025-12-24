@@ -28,6 +28,42 @@
   }
 }
 
+/// If `it` is a raw block with optional surrounding spaces,
+/// return its text; otherwise, return `it`.
+/// 
+/// Usage:
+/// - Accept raw block as string to avoid explicit line breaks (`\`).
+#let to-string-if-raw(
+  it,
+  trim: true,
+) = {
+  let map = if trim {
+    str.trim
+  } else {
+    i => i
+  }
+  if type(it) == content {
+    if it.func() == raw {
+      map(it.text)
+    } else if it.has("children") {
+      let children = it.children
+      let raws = children.filter(i => i.func() == raw)
+      if raws.len() != 1 {
+        return it
+      }
+      let spaces = children.filter(i => i == [ ]).len()
+      if raws.len() + spaces != children.len() {
+        return it
+      }
+      map(raws.pop().text)
+    } else {
+      it
+    }
+  } else {
+    it
+  }
+}
+
 /// - v (int, bool, float, decimal, str, content):
 /// -> int, none
 #let to-int(
