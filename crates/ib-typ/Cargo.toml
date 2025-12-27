@@ -16,6 +16,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = "1"
+bon = "3"
 ciborium = { version = "0.2", optional = true }
 jiff = { version = "0.2", default-features = false, features = [
     "std",
@@ -28,4 +29,5 @@ minijinja = "2.14"
 nop-macros = "0.2"
 serde = { version = "1", features = ["derive"] }
 typwire = { version = "0.1", optional = true }
+unicode-ident = "1"
 wasm-minimal-protocol = { version = "0.1", optional = true }

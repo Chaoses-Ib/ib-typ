@@ -1,11 +1,16 @@
 use std::{fmt::Write, time::Duration};
 
 use anyhow::{Context, bail};
+use bon::builder;
 use logos::Logos;
 use minijinja::{Environment, context};
 use serde::{Deserialize, Serialize};
+use unicode_ident::is_xid_continue;
 
-use crate::time::parse_time;
+use crate::{
+    time::{parse_duration_hms, parse_time},
+    to_jinja,
+};
 
 #[derive(Logos, Clone, Copy, Debug, PartialEq)]
 pub enum DurationToken {
@@ -24,17 +29,32 @@ pub enum DurationToken {
     #[token("-")]
     Minus,
 
-    #[regex(r"[^\d~+-]")]
+    #[token("(")]
+    ParenOpen,
+
+    #[token(")")]
+    ParenClose,
+
+    #[regex(r"[^\d~+\-()]")]
     Other,
 }
 
-pub fn duration_eval_pre(pattern: &str) -> Result<String, anyhow::Error> {
+#[builder]
+pub fn duration_eval_pre(
+    #[builder(start_fn)] pattern: &str,
+    #[builder(default)] time_min_sec: bool,
+) -> Result<String, anyhow::Error> {
     let mut lex = DurationToken::lexer(&pattern);
     let mut s = String::new();
     while let Some(Ok(token)) = lex.next() {
         // dbg!(token);
         match token {
             DurationToken::Time => {
+                if time_min_sec {
+                    let d = parse_duration_hms(lex.slice())?;
+                    write!(s, "{}", d.as_secs_f64() / 60.0)?;
+                    continue;
+                }
                 let a = parse_time(lex.slice())?;
                 let op = lex.next().transpose().ok().flatten().context("op")?;
                 let mut b = || lex.next().transpose().ok().flatten().context("b");
@@ -60,6 +80,24 @@ pub fn duration_eval_pre(pattern: &str) -> Result<String, anyhow::Error> {
                     _ => bail!("op"),
                 }
             }
+            DurationToken::ParenOpen => {
+                s += "(";
+                let c = &s[s.floor_char_boundary(lex.span().start - 1)..]
+                    .chars()
+                    .next();
+                if c.is_some_and(is_xid_continue) {
+                    s += "'";
+                    while let Some(Ok(token)) = lex.next() {
+                        match token {
+                            DurationToken::ParenClose => {
+                                s += "')";
+                                break;
+                            }
+                            _ => s += lex.slice(),
+                        }
+                    }
+                }
+            }
             _ => s += lex.slice(),
         }
     }
@@ -74,8 +112,16 @@ pub struct DurationEval {
     pub approx: bool,
 }
 
-pub fn duration_eval(s: &str) -> Result<DurationEval, anyhow::Error> {
-    let s = duration_eval_pre(s)?;
+fn mss(s: String) -> Result<f64, minijinja::Error> {
+    let s = duration_eval_pre(&s)
+        .time_min_sec(true)
+        .call()
+        .map_err(to_jinja)?;
+    let d = duration_eval_inner(&s).map_err(to_jinja)?;
+    Ok(d.d.as_secs_f64() / 60.0)
+}
+
+fn duration_eval_inner(s: &str) -> Result<DurationEval, anyhow::Error> {
     let (s, plus) = {
         let e = s.strip_prefix("+");
         (e.unwrap_or(&s), e.is_some())
@@ -88,11 +134,17 @@ pub fn duration_eval(s: &str) -> Result<DurationEval, anyhow::Error> {
     // e.g. 1h, inputing 1+
     let s = s.strip_suffix("+").unwrap_or(&s);
 
-    let env = Environment::empty();
+    let mut env = Environment::empty();
+    env.add_function("mss", mss);
     let expr = env.compile_expression(&s).with_context(|| s.to_owned())?;
     let r = expr.eval(context!()).unwrap();
     let d = Duration::from_secs_f64(TryInto::<f64>::try_into(r)? * 60.0);
     Ok(DurationEval { d, plus, approx })
+}
+
+pub fn duration_eval(s: &str) -> Result<DurationEval, anyhow::Error> {
+    let s = duration_eval_pre(s).call()?;
+    duration_eval_inner(&s)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -150,6 +202,10 @@ pub mod wasm {
 mod tests {
     use super::*;
 
+    pub fn duration_eval_pre(s: &str) -> Result<String, anyhow::Error> {
+        super::duration_eval_pre(s).call()
+    }
+
     #[test]
     fn duration_eval_pre_() -> anyhow::Result<()> {
         // Time range
@@ -174,6 +230,15 @@ mod tests {
             duration_eval("1h3.3")?.d,
             Duration::from_secs(63 * 60 + 3 * 6)
         );
+        Ok(())
+    }
+
+    #[test]
+    fn duration_eval_mss() -> anyhow::Result<()> {
+        assert_eq!(duration_eval_format_s("1+mss(1:30)")?, "3");
+        assert_eq!(duration_eval_format_s("1+mss(1:15+0:14)")?, "2");
+        assert_eq!(duration_eval_format_s("1+mss(1:15+0:15)")?, "3");
+        assert_eq!(duration_eval_format_s("1+(1+0.9)")?, "3");
         Ok(())
     }
 
