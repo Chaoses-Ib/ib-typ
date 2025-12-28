@@ -27,6 +27,8 @@
 #import "refs.typ"
 #import "refs.typ": (
   q,
+  q-at,
+  q-i,
 )
 #import "time/mod.typ" as time
 #import "time/mod.typ": (

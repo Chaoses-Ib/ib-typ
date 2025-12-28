@@ -87,3 +87,20 @@
     to-int(to-string(it))
   }
 }
+
+/// Usage:
+/// - Implement show-if: `#show: to-function(show-f-or-none)`
+/// 
+/// - v (function, none):
+/// -> function
+#let to-function(
+  v,
+  default: v => v,
+) = {
+  let t = type(v)
+  if t == function {
+    v
+  } else {
+    default
+  }
+}

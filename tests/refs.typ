@@ -33,3 +33,17 @@ A#q[
 - A
 - B
 ]B
+
+== Attribution
+#quote(attribution: [サグメ])[#lorem(5)]
+
+#{
+  show: quote-inline-attribution 
+  quote(attribution: [サグメ])[#lorem(5)]
+} \
+#q(at: [サグメ])[#lorem(5)] \
+#q-at[サグメ][#lorem(5)] \
+
+#q-at[][#lorem(5)]
+
+#q-i[#lorem(5)]
