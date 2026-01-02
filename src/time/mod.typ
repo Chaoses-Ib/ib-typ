@@ -1,4 +1,4 @@
-#import "../util.typ": to-string
+#import "../util.typ": plugin, abi_cbor, to-string
 #import "../layouts.typ"
 
 #import "duration.typ": *
@@ -22,6 +22,8 @@
   .replace(regex(`([^:+-]\d\d:\d\d)($|[Z+-])`.text), m => m.captures.at(0) + ":00" + m.captures.at(1))
 }
 
+#let parse_date_short_to_int = abi_cbor(plugin.parse_date_short_to_int)
+
 /// - s (str, int, content):
 /// -> datetime
 #let datetime_parse(s, yymm: false) = {
@@ -39,7 +41,16 @@
     }
   }
   // Allow int with leading zero
+  /*
   let s = s.trim("0", at: start)
+  */
+  let i = parse_date_short_to_int(
+    s: s,
+    yymmdd: false,
+  )
+  if i != none {
+    return i
+  }
   // TODO: https://github.com/typst/typst/issues/4107
   toml(bytes("d=" + datetime_norm_rfc3339(s))).d
 }

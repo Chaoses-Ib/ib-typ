@@ -2,6 +2,7 @@ use anyhow::{Context, bail};
 use jiff::SignedDuration;
 
 pub mod duration;
+pub mod short;
 
 /// - `m:ss`
 /// - `h:mm:ss`
