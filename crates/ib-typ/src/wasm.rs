@@ -6,7 +6,12 @@ pub use nop_macros::nop as wasm_func;
 #[cfg(all(not(test), feature = "wasm"))]
 pub use wasm_minimal_protocol::wasm_func;
 
-pub use crate::to_bytes;
+pub use crate::{from_bytes, to_bytes};
+
+#[macro_export]
+macro_rules! from_bytes {
+    ($r:expr) => {{ ciborium::from_reader($r)? }};
+}
 
 #[macro_export]
 macro_rules! to_bytes {
