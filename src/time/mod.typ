@@ -38,6 +38,8 @@
       )
     }
   }
+  // Allow int with leading zero
+  let s = s.trim("0", at: start)
   // TODO: https://github.com/typst/typst/issues/4107
   toml(bytes("d=" + datetime_norm_rfc3339(s))).d
 }
