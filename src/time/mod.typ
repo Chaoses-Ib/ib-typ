@@ -98,7 +98,8 @@
         day: 1
       ).display("[year]-[month]")
     }
-  } else if type(d) != datetime {
+  }
+  if type(d) != datetime {
     d = to-string(d)
     let datetime_format = datetime_format.with(offset: offset, f: f)
 
