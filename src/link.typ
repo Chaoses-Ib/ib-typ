@@ -40,8 +40,11 @@
     if badge != none {
       return badge(uri)
     }
-    
+
+    /*
     body = host
+    */
+    body = www.uri-media(uri)
   }
   www.badge-gray[
     #link(uri, body)

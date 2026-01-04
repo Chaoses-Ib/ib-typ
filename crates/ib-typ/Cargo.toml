@@ -10,6 +10,7 @@ wasm = [
     "dep:ciborium",
     "dep:typwire",
 ]
+wasm-extra = ["wasm"]
 
 [lib]
 crate-type = ["cdylib"]
@@ -30,4 +31,5 @@ nop-macros = "0.2"
 serde = { version = "1", features = ["derive"] }
 typwire = { version = "0.1", optional = true }
 unicode-ident = "1"
+url = "2"
 wasm-minimal-protocol = { version = "0.1", optional = true }

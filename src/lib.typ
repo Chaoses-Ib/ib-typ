@@ -38,6 +38,7 @@
 )
 #import "uri.typ"
 #import "util.typ"
+#import "www.typ"
 #import "www.typ": (
   ai,
   wikipedia,

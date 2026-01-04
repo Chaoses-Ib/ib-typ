@@ -1,6 +1,9 @@
 #import "badge.typ": *
 #import "icon.typ"
 #import "uri.typ": host-ancestors
+#import "util.typ": plugin
+
+#let uri-media(uri) = cbor(plugin.uri_media(bytes(uri)))
 
 /// - body (content):
 #let ai(body: [AI]) = [
@@ -57,4 +60,4 @@
       return HOST-BADGE.at(host)
     }
   }
-} 
+}
