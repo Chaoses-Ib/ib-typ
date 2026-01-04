@@ -6,6 +6,13 @@
   f
 }
 
+#let dbg(v) = {
+  let t = type(v)
+  if t == content {
+    v.fields()
+  }
+}
+
 /// Usage:
 /// - Trailing `str` arguments
 /// 

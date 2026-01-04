@@ -30,6 +30,7 @@
   q-at,
   q-i,
 )
+#import "texts.typ"
 #import "time/mod.typ" as time
 #import "time/mod.typ": (
   t,
