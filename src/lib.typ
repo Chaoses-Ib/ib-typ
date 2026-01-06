@@ -17,6 +17,7 @@
   white,
 )
 #import "icon.typ"
+#import "introspection/mod.typ" as introspection
 #import "link.typ" as links
 #import "link.typ": (
   a,
