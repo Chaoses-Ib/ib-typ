@@ -19,13 +19,20 @@ impl Times {
             return Ok(Default::default());
         }
 
-        let mut times = self.times.iter();
+        let mut times = self.times.iter().peekable();
         let mut s = String::new();
         while let Some(t) = times.next() {
             if !s.is_empty() {
+                // Break on time with date
+                if parse_time(t).is_err() {
+                    s += "\n";
+                }
+
                 s += "+";
             }
-            match times.next() {
+
+            // Time range's second op should be a time without date
+            match times.next_if(|t| parse_time(t).is_ok()) {
                 Some(t2) => {
                     write!(s, "{t}-{t2}")?;
                 }
