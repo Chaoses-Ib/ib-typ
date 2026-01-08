@@ -171,6 +171,8 @@
   body: none,
 ) = {
   badgery.badge-gray([
+    #metadata(to-string(s))
+    <ib.time.t>
     #datetime_format(s, offset: offset, f: f)
     #body
   ])

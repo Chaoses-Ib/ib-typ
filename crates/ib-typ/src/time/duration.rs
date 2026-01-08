@@ -8,9 +8,44 @@ use serde::{Deserialize, Serialize};
 use unicode_ident::is_xid_continue;
 
 use crate::{
-    time::{parse_duration_hms, parse_time},
+    time::{Times, parse_duration_hms, parse_time},
     to_jinja,
 };
+
+impl Times {
+    pub fn to_duration(&self) -> anyhow::Result<String> {
+        // A duration needs at least two time points
+        if self.times.len() < 2 {
+            return Ok(Default::default());
+        }
+
+        let mut times = self.times.iter();
+        let mut s = String::new();
+        while let Some(t) = times.next() {
+            if !s.is_empty() {
+                s += "+";
+            }
+            match times.next() {
+                Some(t2) => {
+                    write!(s, "{t}-{t2}")?;
+                }
+                None => s += t,
+            }
+        }
+        Ok(s)
+    }
+
+    pub fn to_duration_and_eval(&self) -> anyhow::Result<DurationFormat> {
+        let s = self.to_duration()?;
+        match duration_eval_format(&s) {
+            Ok(d) => Ok(DurationFormat {
+                s: format!("{}: {s}", d.s),
+                ..d
+            }),
+            Err(_) => Ok(DurationFormat { s, seconds: 0 }),
+        }
+    }
+}
 
 #[derive(Logos, Clone, Copy, Debug, PartialEq)]
 pub enum DurationToken {
@@ -143,6 +178,9 @@ fn duration_eval_inner(s: &str) -> Result<DurationEval, anyhow::Error> {
 }
 
 pub fn duration_eval(s: &str) -> Result<DurationEval, anyhow::Error> {
+    if s.is_empty() {
+        bail!("empty");
+    }
     let s = duration_eval_pre(s).call()?;
     duration_eval_inner(&s)
 }
@@ -187,6 +225,7 @@ pub fn duration_eval_format_s(s: &str) -> Result<String, anyhow::Error> {
 
 #[cfg(feature = "wasm")]
 pub mod wasm {
+    use super::*;
     use crate::wasm::*;
 
     initiate_protocol!();
@@ -195,6 +234,19 @@ pub mod wasm {
     pub fn duration_eval_format(s: &[u8]) -> anyhow::Result<Vec<u8>> {
         let s = str::from_utf8(s)?;
         to_bytes!(super::duration_eval_format(s)?)
+    }
+
+    #[cfg(feature = "wasm-extra")]
+    #[wasm_func]
+    pub fn times_to_duration(s: &[u8]) -> anyhow::Result<Vec<u8>> {
+        let s: Times = from_bytes!(s);
+        to_bytes!(s.to_duration()?)
+    }
+
+    #[wasm_func]
+    pub fn times_to_duration_and_eval(s: &[u8]) -> anyhow::Result<Vec<u8>> {
+        let s: Times = from_bytes!(s);
+        to_bytes!(s.to_duration_and_eval()?)
     }
 }
 

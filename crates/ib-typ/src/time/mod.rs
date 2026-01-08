@@ -1,8 +1,14 @@
 use anyhow::{Context, bail};
 use jiff::SignedDuration;
+use serde::{Deserialize, Serialize};
 
 pub mod duration;
 pub mod short;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Times {
+    pub times: Vec<String>,
+}
 
 /// - `m:ss`
 /// - `h:mm:ss`
