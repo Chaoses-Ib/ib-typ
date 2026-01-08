@@ -1,11 +1,3 @@
-#let plugin = plugin("ib_typ.wasm")
-
-/// CBOR ABI decorator.
-#let abi_cbor(fn) = {
-  let f(..s) = cbor(fn(cbor.encode(s.named())))
-  f
-}
-
 #let dbg(v) = {
   let t = type(v)
   if t == content {

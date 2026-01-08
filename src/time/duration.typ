@@ -1,7 +1,8 @@
-#import "../util.typ": to-string, plugin
+#import "../ffi.typ": plugin-abi-cbor, plugin-abi-str-cbor
+#import "../util.typ": to-string
 #import "../color.typ"
 
-#let duration-eval-format(s) = cbor(plugin.duration_eval_format(bytes(s)))
+#let duration-eval-format = plugin-abi-str-cbor("duration_eval_format")
 
 #let duration-suffix(
   it,

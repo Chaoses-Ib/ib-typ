@@ -1,9 +1,9 @@
 #import "badge.typ": *
+#import "ffi.typ": plugin-abi-str-cbor
 #import "icon.typ"
 #import "uri.typ": host-ancestors
-#import "util.typ": plugin
 
-#let uri-media(uri) = cbor(plugin.uri_media(bytes(uri)))
+#let uri-media = plugin-abi-str-cbor("uri_media")
 
 /// - body (content):
 #let ai(body: [AI]) = [
