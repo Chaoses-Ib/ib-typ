@@ -1,0 +1,18 @@
+[package]
+name = "ib-typ-ide"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["wasm"]
+wasm = [
+    "dep:wasm-bindgen",
+]
+wasm-extra = ["wasm"]
+
+[dependencies]
+ib-typ = { version = "0.1", default-features = false, path = "../ib-typ" }
+wasm-bindgen = { version = "0.2", optional = true }
+
+[lib]
+crate-type = ["cdylib", "rlib"]

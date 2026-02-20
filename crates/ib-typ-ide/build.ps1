@@ -4,14 +4,17 @@
     [switch]$r
 )
 if ($r) {
-    $prof = 'release-os'
+    $prof = 'debug'
     $opt = 'O3'
 }
-cargo rustc -p ib-typ `
+$target_dir = Join-Path $PSScriptRoot "../../target/wasm32-unknown-unknown/$prof"
+$pkg_dir = Join-Path $PSScriptRoot "pkg"
+
+cargo rustc -p ib-typ-ide `
     --target wasm32-unknown-unknown `
     --crate-type cdylib `
     --profile $($prof -eq 'debug' ? 'dev' : $prof)
-wasm-opt ./target/wasm32-unknown-unknown/$prof/ib_typ.wasm `
+wasm-opt $target_dir/ib_typ_ide.wasm `
     -$opt `
     --enable-bulk-memory-opt --enable-nontrapping-float-to-int `
-    -o ./src/ib_typ.wasm
+    -o $pkg_dir/ib_typ_ide_bg.wasm

@@ -1,6 +1,7 @@
 #![feature(str_split_remainder)]
 
 pub mod time;
+#[cfg(feature = "wasm")]
 pub mod wasm;
 pub mod www;
 
