@@ -29,6 +29,7 @@ logos = { version = "0.16", default-features = false, features = [
 minijinja = "2.14"
 nop-macros = "0.2"
 serde = { version = "1", features = ["derive"] }
+thiserror = "2"
 typwire = { version = "0.1", optional = true }
 unicode-ident = "1"
 url = "2"

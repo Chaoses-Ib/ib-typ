@@ -177,6 +177,7 @@ dependencies = [
  "minijinja",
  "nop-macros",
  "serde",
+ "thiserror",
  "typwire",
  "unicode-ident",
  "url",
@@ -187,6 +188,7 @@ dependencies = [
 name = "ib-typ-ide"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "ib-typ",
  "wasm-bindgen",
 ]

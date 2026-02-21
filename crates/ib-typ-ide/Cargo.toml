@@ -11,6 +11,7 @@ wasm = [
 wasm-extra = ["wasm"]
 
 [dependencies]
+anyhow = "1"
 ib-typ = { version = "0.1", default-features = false, path = "../ib-typ" }
 wasm-bindgen = { version = "0.2", optional = true }
 

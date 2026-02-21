@@ -1,6 +1,13 @@
 use url::Url;
 
 pub mod community;
+pub mod search;
+
+pub fn uri_authority(uri: &Url) -> &str {
+    let auth = uri.authority();
+    let auth = auth.strip_prefix("www.").unwrap_or(auth);
+    auth
+}
 
 /// - `www.` subdomain is skipped.
 pub fn uri_host_ancestors_try_for_each<R>(
@@ -31,8 +38,7 @@ pub fn uri_media(url: &Url) -> String {
     if let Some(com) = community::uri_community(url) {
         return com;
     }
-    let auth = url.authority();
-    let auth = auth.strip_prefix("www.").unwrap_or(auth);
+    let auth = uri_authority(url);
     auth.into()
 }
 
