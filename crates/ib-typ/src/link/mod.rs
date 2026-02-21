@@ -1,6 +1,7 @@
 use std::fmt;
 
 use thiserror::Error;
+use url::Url;
 
 pub mod tree;
 
@@ -14,7 +15,7 @@ pub enum LinksError {
     InvalidLink(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Link {
     pub uri: String,
     pub title: String,
@@ -34,16 +35,17 @@ impl Link {
         let it = s.lines().filter(|l| !l.is_empty()).array_chunks();
 
         // Deduce & validate
+        let mut b_uri = true;
         let mut n = 0;
         {
             let mut it = it.clone();
             let mut a_uri = true;
-            let mut b_uri = true;
             for [a, b] in &mut it {
-                if !a.contains("://") {
+                // Fast fail || Strict validate
+                if !a.contains("://") || Url::try_from(a).is_err() {
                     a_uri = false;
                 }
-                if !b.contains("://") {
+                if !b.contains("://") || Url::try_from(b).is_err() {
                     b_uri = false;
                 }
                 if !a_uri && !b_uri {
@@ -60,7 +62,10 @@ impl Link {
         }
 
         let mut links = Vec::with_capacity(n);
-        for [title, uri] in it {
+        for [mut title, mut uri] in it {
+            if !b_uri {
+                core::mem::swap(&mut title, &mut uri);
+            }
             links.push(Link::new(uri, title));
         }
         Ok(links)
@@ -100,7 +105,13 @@ https://www.google.com/search?q=vscode.DocumentPasteEditProvider exmaple
 vscode-extension-samples/document-paste/src/extension.ts at main · microsoft/vscode-extension-samples
 https://github.com/microsoft/vscode-extension-samples/blob/main/document-paste/src/extension.ts
 ";
-        assert_eq!(Link::try_from_uri_title_lines(s).unwrap().len(), 2);
+        let links = Link::try_from_uri_title_lines(s).unwrap();
+        dbg!(&links);
+        assert_eq!(links.len(), 2);
+        assert_eq!(
+            links[0].title,
+            "vscode.DocumentPasteEditProvider exmaple - Google Search"
+        );
 
         let s = "https://www.google.com/search?q=vscode.DocumentPasteEditProvider exmaple
 vscode.DocumentPasteEditProvider exmaple - Google Search
@@ -108,6 +119,21 @@ vscode.DocumentPasteEditProvider exmaple - Google Search
 https://github.com/microsoft/vscode-extension-samples/blob/main/document-paste/src/extension.ts
 vscode-extension-samples/document-paste/src/extension.ts at main · microsoft/vscode-extension-samples
 ";
-        assert_eq!(Link::try_from_uri_title_lines(s).unwrap().len(), 2);
+        let links2 = Link::try_from_uri_title_lines(s).unwrap();
+        assert_eq!(links, links2);
+
+        // Both contain ://
+        let s = "https://www.google.com/search?q=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DSNcpoS4cs_g
+https://www.youtube.com/watch?v=SNcpoS4cs_g - Google Search
+https://www.youtube.com/watch?v=SNcpoS4cs_g
+【#RKMusic歌枠リレー】大祝福【CULUA】 - YouTube
+";
+        let links = Link::try_from_uri_title_lines(s).unwrap();
+        dbg!(&links);
+        assert_eq!(links.len(), 2);
+        assert_eq!(
+            links[1].title,
+            "【#RKMusic歌枠リレー】大祝福【CULUA】 - YouTube"
+        );
     }
 }
