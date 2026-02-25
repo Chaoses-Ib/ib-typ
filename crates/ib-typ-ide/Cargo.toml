@@ -12,6 +12,8 @@ wasm-extra = ["wasm"]
 
 [dependencies]
 anyhow = "1"
+bon = "3"
+derive_more = { version = "2", features = ["full"] }
 ib-typ = { version = "0.1", default-features = false, path = "../ib-typ" }
 wasm-bindgen = { version = "0.2", optional = true }
 

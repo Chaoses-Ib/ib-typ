@@ -1,6 +1,9 @@
+use bon::Builder;
 use ib_typ::link::Link;
 
-use crate::wasm::wasm_bindgen;
+use crate::{paste::kind::PasteEditKind, wasm::wasm_bindgen};
+
+pub mod kind;
 
 #[wasm_bindgen(js_namespace = ["paste"])]
 #[derive(Clone, Debug)]
@@ -9,7 +12,8 @@ pub struct PasteEditProvider {
 }
 
 #[wasm_bindgen(getter_with_clone, js_namespace = ["paste"])]
-#[derive(Clone, Debug)]
+#[derive(Builder, Clone, Debug)]
+#[builder(on(String, into))]
 pub struct PasteEdit {
     /// The text to insert at the pasted locations.
     #[wasm_bindgen(readonly)]
@@ -18,6 +22,17 @@ pub struct PasteEdit {
     /// Human readable label that describes the edit.
     #[wasm_bindgen(readonly)]
     pub title: String,
+
+    #[builder(default)]
+    #[wasm_bindgen(readonly)]
+    pub kind: PasteEditKind,
+
+    /// Controls ordering when multiple paste edits can potentially be applied.
+    ///
+    /// If this edit yields to another, it will be shown lower in the list of possible paste edits shown to the user.
+    #[builder(default)]
+    #[wasm_bindgen(readonly)]
+    pub yield_to: Vec<PasteEditKind>,
 }
 
 #[wasm_bindgen]
@@ -29,16 +44,24 @@ impl PasteEditProvider {
         }
     }
 
+    /// This is used to filter out providers when a specific kind of edit is requested.
+    pub fn kinds(&self) -> Vec<PasteEditKind> {
+        PasteEditKind::IB_KINDS.into()
+    }
+
     pub fn provide_edits(&self, text: &str) -> Vec<PasteEdit> {
         let mut edits = Vec::new();
 
         if self.link_list_to_tree_typ
             && let Ok(links) = Link::try_from_uri_title_lines(text)
         {
-            edits.push(PasteEdit {
-                text: ib_typ::link::tree::link_list_to_tree_typ(&links),
-                title: "Link list to Typst tree".into(),
-            });
+            edits.push(
+                PasteEdit::builder()
+                    .text(ib_typ::link::tree::link_list_to_tree_typ(&links))
+                    .title("Link List to Typst Tree")
+                    .kind(PasteEditKind::TYPST_IB_LINK_LIST_TO_TREE)
+                    .build(),
+            );
         }
 
         edits

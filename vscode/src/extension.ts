@@ -1,13 +1,14 @@
 import * as ib from 'ib-typ-ide';
 import * as vscode from 'vscode';
 import { typstDocumentSelector } from './util';
-import { PasteResourceProvider } from './paste';
+import { PasteEditProvider } from './paste';
 
 export function activate(context: vscode.ExtensionContext) {
+  const pasteEditProvider = new PasteEditProvider();
   context.subscriptions.push(
-    vscode.languages.registerDocumentPasteEditProvider(typstDocumentSelector, new PasteResourceProvider(), {
-      providedPasteEditKinds: [PasteResourceProvider.kind],
-      pasteMimeTypes: PasteResourceProvider.mimeTypes,
+    vscode.languages.registerDocumentPasteEditProvider(typstDocumentSelector, pasteEditProvider, {
+      providedPasteEditKinds: pasteEditProvider.kinds(),
+      pasteMimeTypes: PasteEditProvider.mimeTypes,
     })
   );
 

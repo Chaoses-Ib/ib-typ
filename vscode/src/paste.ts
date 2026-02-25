@@ -6,10 +6,26 @@ export const Mime = {
   textPlain: "text/plain",
 } as const;
 
+function mapKind(kind: ib.PasteEditKind): vscode.DocumentDropOrPasteEditKind {
+  return vscode.DocumentDropOrPasteEditKind.Empty.append(kind[0])
+}
+
+function mapEdits(edits: ib.PasteEdit[]): vscode.DocumentPasteEdit[] {
+  return edits.map(edit => {
+    let e = new vscode.DocumentPasteEdit(
+      edit.text,
+      edit.title,
+      mapKind(edit.kind),
+    )
+    e.yieldTo = edit.yield_to.map(mapKind)
+    return e
+  })
+}
+
 /**
 https://github.com/microsoft/vscode-extension-samples/blob/main/document-paste/src/extension.ts
 */
-export class PasteResourceProvider implements vscode.DocumentPasteEditProvider {
+export class PasteEditProvider implements vscode.DocumentPasteEditProvider {
   public static readonly kind = vscode.DocumentDropOrPasteEditKind.Text
 
   public static readonly mimeTypes = [Mime.textPlain];
@@ -18,6 +34,10 @@ export class PasteResourceProvider implements vscode.DocumentPasteEditProvider {
 
   constructor() {
     this.provider = new ib.paste.PasteEditProvider()
+  }
+
+  kinds(): vscode.DocumentDropOrPasteEditKind[] {
+    return this.provider.kinds().map(mapKind)
   }
 
   public async provideDocumentPasteEdits(
@@ -57,10 +77,6 @@ export class PasteResourceProvider implements vscode.DocumentPasteEditProvider {
     ];
     */
     const edits = this.provider.provide_edits(text)
-    return edits.map(edit => new vscode.DocumentPasteEdit(
-      edit.text,
-      edit.title,
-      PasteResourceProvider.kind
-    ))
+    return mapEdits(edits)
   }
 }
