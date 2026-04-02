@@ -53,7 +53,8 @@ impl Link {
                 }
                 n += 1;
             }
-            if let Some(rem) = it.into_remainder().and_then(|mut rem| rem.next()) {
+            // it.into_remainder().and_then(|mut rem| rem.next())
+            if let Some(rem) = it.into_remainder().next() {
                 return Err(LinksError::InvalidLink(rem.into()));
             }
             if a_uri && b_uri {
@@ -88,7 +89,7 @@ impl fmt::Display for LinkDisplay<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::assert_matches::assert_matches;
+    use std::assert_matches;
 
     use super::*;
 

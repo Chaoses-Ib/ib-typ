@@ -1,4 +1,3 @@
-#![feature(assert_matches)]
 #![feature(iter_array_chunks)]
 #![feature(str_split_remainder)]
 
