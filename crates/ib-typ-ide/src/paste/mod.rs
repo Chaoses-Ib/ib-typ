@@ -67,12 +67,16 @@ impl PasteEditProvider {
         }
 
         // Plain note conversion
-        if self.plain_note {
+        if self.plain_note
+            && let Some((typ, likely)) =
+                plain::PlainToTyp::builder().build().detect_and_to_typ(text)
+        {
             edits.push(
                 PasteEdit::builder()
-                    .text(plain::plain_to_typ(text))
+                    .text(typ)
                     .title("Plain Text Note to Typst")
                     .kind(PasteEditKind::TYPST_IB_PLAIN)
+                    .maybe_yield_to((!likely).then(|| vec![PasteEditKind::TEXT]))
                     .build(),
             );
         }
