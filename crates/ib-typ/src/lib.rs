@@ -2,6 +2,7 @@
 #![feature(str_split_remainder)]
 
 pub mod link;
+pub mod plain;
 pub mod time;
 #[cfg(feature = "wasm")]
 pub mod wasm;

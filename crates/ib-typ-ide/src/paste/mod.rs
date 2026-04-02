@@ -1,5 +1,5 @@
 use bon::Builder;
-use ib_typ::link::Link;
+use ib_typ::{link::Link, plain};
 
 use crate::{paste::kind::PasteEditKind, wasm::wasm_bindgen};
 
@@ -9,6 +9,7 @@ pub mod kind;
 #[derive(Clone, Debug)]
 pub struct PasteEditProvider {
     pub link_list_to_tree_typ: bool,
+    pub plain_note: bool,
 }
 
 #[wasm_bindgen(getter_with_clone, js_namespace = ["paste"])]
@@ -41,6 +42,7 @@ impl PasteEditProvider {
     pub fn new() -> Self {
         Self {
             link_list_to_tree_typ: true,
+            plain_note: true,
         }
     }
 
@@ -60,6 +62,17 @@ impl PasteEditProvider {
                     .text(ib_typ::link::tree::link_list_to_tree_typ(&links))
                     .title("Link List to Typst Tree")
                     .kind(PasteEditKind::TYPST_IB_LINK_LIST_TO_TREE)
+                    .build(),
+            );
+        }
+
+        // Plain note conversion
+        if self.plain_note {
+            edits.push(
+                PasteEdit::builder()
+                    .text(plain::plain_to_typ(text))
+                    .title("Plain Text Note to Typst")
+                    .kind(PasteEditKind::TYPST_IB_PLAIN)
                     .build(),
             );
         }

@@ -46,7 +46,12 @@ impl PasteEditKind {
 
 /// ib-typ
 impl PasteEditKind {
-    pub const IB_KINDS: [Self; 1] = [Self::TYPST_IB_LINK_LIST_TO_TREE];
+    #[rustfmt::skip]
+    pub const IB_KINDS: [Self; 2] = [
+        Self::TYPST_IB_LINK_LIST_TO_TREE,
+        Self::TYPST_IB_PLAIN,
+    ];
 
     pub const TYPST_IB_LINK_LIST_TO_TREE: Self = PasteEditKind("typst.ib.link.list_to_tree");
+    pub const TYPST_IB_PLAIN: Self = PasteEditKind("typst.ib.plain");
 }
