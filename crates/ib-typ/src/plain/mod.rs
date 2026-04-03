@@ -21,9 +21,30 @@ pub enum PlainNoteToken {
     #[regex(r"\d?\d:\d\d")]
     Time,
 
+    /// Simplified [`DurationToken`](crate::time::duration::DurationToken)
+    ///
+    /// `(?<! )` is checked in [`PlainNoteToken::check()`].
+    #[regex(r"(?m)  (\d+(?:\.\d+)?|[+\-~])+$")]
+    Duration,
+
     /// Anything else (text, numbers, symbols)
     #[regex(r".")]
     Other,
+}
+
+impl PlainNoteToken {
+    pub fn check(&self, lex: &logos::Lexer<PlainNoteToken>) -> bool {
+        match self {
+            PlainNoteToken::Duration => {
+                // result.ends_with(' ')
+                lex.span()
+                    .start
+                    .checked_sub(1)
+                    .is_none_or(|i| lex.source().as_bytes()[i] != b' ')
+            }
+            _ => true,
+        }
+    }
 }
 
 /// Convert an plain note into Typst code.
@@ -61,6 +82,11 @@ impl PlainToTyp {
             match token {
                 PlainNoteToken::Newline => (),
                 PlainNoteToken::Time => return Some((typ, true)),
+                PlainNoteToken::Duration => {
+                    if token.check(&lex) {
+                        return Some((typ, true));
+                    }
+                }
                 PlainNoteToken::Other => (),
             }
         }
@@ -83,7 +109,7 @@ impl PlainToTyp {
                 PlainNoteToken::Newline => {
                     result += match last_token {
                         // Consecutive line feeds
-                        PlainNoteToken::Newline => "\n",
+                        PlainNoteToken::Newline | PlainNoteToken::Duration => "\n",
                         // Line feed after whole-line time
                         PlainNoteToken::Time => "\n\n",
                         // Line feed
@@ -97,13 +123,24 @@ impl PlainToTyp {
                     }
                     write!(result, "#t[{}]", lex.slice()).unwrap();
                 }
+                PlainNoteToken::Duration => {
+                    if token.check(&lex) {
+                        let last_newline = result.rfind('\n').map(|p| p + 1).unwrap_or(0);
+                        let line = result.split_off(last_newline);
+                        let duration = &lex.slice()[2..];
+                        write!(result, "- {line}  |{duration}").unwrap()
+                    } else {
+                        result += lex.slice();
+                    }
+                }
                 PlainNoteToken::Other => result += lex.slice(),
             }
             last_token = token;
         }
         // Trailing new line
         if self.trailing_newline.unwrap_or_else(|| text.contains('\n'))
-            && last_token != PlainNoteToken::Newline
+            // && last_token != PlainNoteToken::Newline
+            && !result.ends_with('\n')
         {
             result += "\n";
         }
@@ -149,5 +186,19 @@ mod tests {
         assert_eq!(plain_to_typ("no time here"), "no time here");
         assert_eq!(plain_to_typ("0:00"), "#t[0:00]");
         assert_eq!(plain_to_typ("23:59"), "#t[23:59]");
+    }
+
+    #[test]
+    fn duration() {
+        // Non-duration
+        assert_eq!(plain_to_typ("音楽  30 "), "音楽  30 ");
+        assert_eq!(plain_to_typ("音楽   30"), "音楽   30");
+
+        // Durations
+        assert_eq!(plain_to_typ("音楽  30"), "- 音楽  |30");
+        assert_eq!(plain_to_typ("  +30"), "-   |+30");
+        assert_eq!(plain_to_typ("  ~5"), "-   |~5");
+        assert_eq!(plain_to_typ("a\n  +30\n"), "a \\\n-   |+30\n");
+        assert_eq!(plain_to_typ("a\nb\n  ~5\n"), "a \\\nb \\\n-   |~5\n");
     }
 }
