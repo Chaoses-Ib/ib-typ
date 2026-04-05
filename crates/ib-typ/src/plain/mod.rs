@@ -13,6 +13,12 @@ use logos::Logos;
 /// Token for plain note format
 #[derive(Logos, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlainNoteToken {
+    /// `#sym.zws`
+    ///
+    /// e.g. YouTube Live chat
+    #[regex(r"\u200B")]
+    ZeroWidthSpace,
+
     /// Newline sequence
     #[regex("\r?\n")]
     Newline,
@@ -28,7 +34,7 @@ pub enum PlainNoteToken {
     Duration,
 
     /// Anything else (text, numbers, symbols)
-    #[regex(r".")]
+    #[regex(r"[^\u200B\n]")]
     Other,
 }
 
@@ -81,7 +87,7 @@ impl PlainToTyp {
         while let Some(Ok(token)) = lex.next() {
             match token {
                 PlainNoteToken::Newline => (),
-                PlainNoteToken::Time => return Some((typ, true)),
+                PlainNoteToken::Time | PlainNoteToken::ZeroWidthSpace => return Some((typ, true)),
                 PlainNoteToken::Duration => {
                     if token.check(&lex) {
                         return Some((typ, true));
@@ -106,8 +112,11 @@ impl PlainToTyp {
         let mut last_token = PlainNoteToken::Other;
         while let Some(Ok(token)) = lex.next() {
             match token {
+                // Strip `ZeroWidthSpace`
+                PlainNoteToken::ZeroWidthSpace => continue,
                 PlainNoteToken::Newline => {
                     result += match last_token {
+                        PlainNoteToken::ZeroWidthSpace => unreachable!(),
                         // Consecutive line feeds
                         PlainNoteToken::Newline | PlainNoteToken::Duration => "\n",
                         // Line feed after whole-line time
@@ -152,6 +161,22 @@ impl PlainToTyp {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn zero_width_space() {
+        // YouTube Live chat
+        assert_eq!(
+            plain_to_typ(
+                "isekaijoucho
+Member (6 years)
+\u{200B}\u{200B}悪口"
+            ),
+            r"isekaijoucho \
+Member (6 years) \
+悪口
+"
+        );
+    }
 
     #[test]
     fn newline() {
