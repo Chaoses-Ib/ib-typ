@@ -24,6 +24,8 @@ pub enum PlainNoteToken {
     Newline,
 
     /// Time in format like `1:30`, `0:00`, `23:59`
+    ///
+    /// - Exclude `Time` with second, e.g. `23:59:00`.
     #[regex(r"\d?\d:\d\d")]
     Time,
 
@@ -40,13 +42,21 @@ pub enum PlainNoteToken {
 
 impl PlainNoteToken {
     pub fn check(&self, lex: &logos::Lexer<PlainNoteToken>) -> bool {
+        let source = lex.source();
+        let span = lex.span();
+        let prev = span.start.checked_sub(1).map(|i| source.as_bytes()[i]);
+        let next = source.as_bytes().get(span.end).copied();
         match self {
+            PlainNoteToken::Time => next != Some(b':') && prev != Some(b':'),
             PlainNoteToken::Duration => {
                 // result.ends_with(' ')
+                /*
                 lex.span()
                     .start
                     .checked_sub(1)
                     .is_none_or(|i| lex.source().as_bytes()[i] != b' ')
+                */
+                prev != Some(b' ')
             }
             _ => true,
         }
@@ -87,8 +97,9 @@ impl PlainToTyp {
         while let Some(Ok(token)) = lex.next() {
             match token {
                 PlainNoteToken::Newline => (),
-                PlainNoteToken::Time | PlainNoteToken::ZeroWidthSpace => return Some((typ, true)),
-                PlainNoteToken::Duration => {
+                PlainNoteToken::ZeroWidthSpace
+                | PlainNoteToken::Time
+                | PlainNoteToken::Duration => {
                     if token.check(&lex) {
                         return Some((typ, true));
                     }
@@ -111,6 +122,11 @@ impl PlainToTyp {
         let mut lex = PlainNoteToken::lexer(text);
         let mut last_token = PlainNoteToken::Other;
         while let Some(Ok(token)) = lex.next() {
+            if !token.check(&lex) {
+                result += lex.slice();
+                last_token = PlainNoteToken::Other;
+                continue;
+            }
             match token {
                 // Strip `ZeroWidthSpace`
                 PlainNoteToken::ZeroWidthSpace => continue,
@@ -133,13 +149,12 @@ impl PlainToTyp {
                     write!(result, "#t[{}]", lex.slice()).unwrap();
                 }
                 PlainNoteToken::Duration => {
-                    if token.check(&lex) {
+                    // Checked
+                    {
                         let last_newline = result.rfind('\n').map(|p| p + 1).unwrap_or(0);
                         let line = result.split_off(last_newline);
                         let duration = &lex.slice()[2..];
                         write!(result, "- {line}  |{duration}").unwrap()
-                    } else {
-                        result += lex.slice();
                     }
                 }
                 PlainNoteToken::Other => result += lex.slice(),
@@ -211,6 +226,9 @@ Member (6 years) \
         assert_eq!(plain_to_typ("no time here"), "no time here");
         assert_eq!(plain_to_typ("0:00"), "#t[0:00]");
         assert_eq!(plain_to_typ("23:59"), "#t[23:59]");
+
+        // Exclude `Time` with second
+        assert_eq!(plain_to_typ("23:59:00"), "23:59:00");
     }
 
     #[test]
