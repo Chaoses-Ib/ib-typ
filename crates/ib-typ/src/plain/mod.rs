@@ -136,7 +136,8 @@ impl PlainToTyp {
                         // Consecutive line feeds
                         PlainNoteToken::Newline | PlainNoteToken::Duration => "\n",
                         // Line feed after whole-line time
-                        PlainNoteToken::Time => "\n\n",
+                        // But \n\n may cause empty lines...
+                        PlainNoteToken::Time => "\n",
                         // Line feed
                         PlainNoteToken::Other => " \\\n",
                     };
@@ -200,7 +201,6 @@ Member (6 years) \
             plain_to_typ("1:30\n9:00"),
             "#t[1:30]
 
-
 #t[9:00]\n"
         );
         assert_eq!(
@@ -210,7 +210,6 @@ Member (6 years) \
 15:03"
             ),
             r"#t[13:44]
-
 3D アンシャ \
 
 #t[15:03]
