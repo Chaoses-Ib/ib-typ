@@ -13,6 +13,14 @@ use logos::Logos;
 /// Token for plain note format
 #[derive(Logos, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlainNoteToken {
+    /// Plain hash (hashtag)
+    ///
+    /// Not "#kebab-case".
+    /// - Although Typst ID can be in other forms and Unicode, it's usually "kebab-case".
+    /// - Ending with '#' (`|#$`) is removed for simplicity and avoiding false positives.
+    #[regex("#[^a-z_]")]
+    Hash,
+
     /// `#sym.zws`
     ///
     /// e.g. YouTube Live chat
@@ -36,6 +44,8 @@ pub enum PlainNoteToken {
     Duration,
 
     /// Anything else (text, numbers, symbols)
+    ///
+    /// `[^#\u200B\n]|#[a-z_]`
     #[regex(r"[^\u200B\n]")]
     Other,
 }
@@ -47,6 +57,7 @@ impl PlainNoteToken {
         let prev = span.start.checked_sub(1).map(|i| source.as_bytes()[i]);
         let next = source.as_bytes().get(span.end).copied();
         match self {
+            PlainNoteToken::Hash => prev != Some(b'\\'),
             PlainNoteToken::Time => next != Some(b':') && prev != Some(b':'),
             PlainNoteToken::Duration => {
                 // result.ends_with(' ')
@@ -98,6 +109,7 @@ impl PlainToTyp {
             match token {
                 PlainNoteToken::Newline => (),
                 PlainNoteToken::ZeroWidthSpace
+                | PlainNoteToken::Hash
                 | PlainNoteToken::Time
                 | PlainNoteToken::Duration => {
                     if token.check(&lex) {
@@ -128,6 +140,7 @@ impl PlainToTyp {
                 continue;
             }
             match token {
+                PlainNoteToken::Hash => write!(result, "\\{}", lex.slice()).unwrap(),
                 // Strip `ZeroWidthSpace`
                 PlainNoteToken::ZeroWidthSpace => continue,
                 PlainNoteToken::Newline => {
@@ -139,7 +152,7 @@ impl PlainToTyp {
                         // But \n\n may cause empty lines...
                         PlainNoteToken::Time => "\n",
                         // Line feed
-                        PlainNoteToken::Other => " \\\n",
+                        PlainNoteToken::Other | _ => " \\\n",
                     };
                 }
                 PlainNoteToken::Time => {
@@ -177,6 +190,23 @@ impl PlainToTyp {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn hash() {
+        // `#` followed by non-lowercase/non-underscore -> `\#`
+        assert_eq!(plain_to_typ("#3D"), "\\#3D");
+        assert_eq!(plain_to_typ("#A"), "\\#A");
+        assert_eq!(plain_to_typ("#$"), "\\#$");
+        assert_eq!(plain_to_typ("# "), "\\# ");
+        assert_eq!(plain_to_typ("#メスガキ"), "\\#メスガキ");
+
+        // `#` followed by lowercase or underscore -> kept as-is
+        assert_eq!(plain_to_typ("#t"), "#t");
+        assert_eq!(plain_to_typ("#_"), "#_");
+
+        // Escaped `\#` -> kept as-is
+        assert_eq!(plain_to_typ("\\#x"), "\\#x");
+    }
 
     #[test]
     fn zero_width_space() {
