@@ -59,7 +59,7 @@ pub enum DurationToken {
     #[regex(r"\d+(?:\.\d+)?")]
     Number,
 
-    #[regex(r"\d?\d:\d\d")]
+    #[regex(r"\d?\d:\d\d(?::\d\d)?")]
     Time,
 
     #[token("~")]
@@ -298,6 +298,9 @@ mod tests {
         assert_eq!(duration_eval_format_s("1+mss(1:15+0:14)")?, "2");
         assert_eq!(duration_eval_format_s("1+mss(1:15+0:15)")?, "3");
         assert_eq!(duration_eval_format_s("1+(1+0.9)")?, "3");
+
+        // hms
+        assert_eq!(duration_eval_format_s("mss(1:15:45-36:40)")?, "0.7h");
         Ok(())
     }
 
