@@ -6,4 +6,5 @@ Debugging:
   & VS Code `Reload Window`
 
 = Publish
+- ```sh npm install -g @vscode/vsce```
 - ```sh vsce package```

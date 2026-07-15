@@ -11,6 +11,8 @@ use bon::Builder;
 use logos::Logos;
 
 /// Token for plain note format
+///
+/// - `\r` will be removed.
 #[derive(Logos, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlainNoteToken {
     /// Plain hash (hashtag)
@@ -40,7 +42,7 @@ pub enum PlainNoteToken {
     /// Simplified [`DurationToken`](crate::time::duration::DurationToken)
     ///
     /// `(?<! )` is checked in [`PlainNoteToken::check()`].
-    #[regex(r"(?m)  (\d+(?:\.\d+)?|[+\-~])+$")]
+    #[regex(r"(?m)  (\d+(?:\.\d+)?|[+\-~])+\r?$")]
     Duration,
 
     /// Anything else (text, numbers, symbols)
@@ -168,6 +170,8 @@ impl PlainToTyp {
                         let last_newline = result.rfind('\n').map(|p| p + 1).unwrap_or(0);
                         let line = result.split_off(last_newline);
                         let duration = &lex.slice()[2..];
+                        // Remove \r
+                        let duration = duration.strip_suffix('\r').unwrap_or(duration);
                         write!(result, "- {line}  |{duration}").unwrap()
                     }
                 }
@@ -272,5 +276,28 @@ Member (6 years) \
         assert_eq!(plain_to_typ("  ~5"), "-   |~5");
         assert_eq!(plain_to_typ("a\n  +30\n"), "a \\\n-   |+30\n");
         assert_eq!(plain_to_typ("a\nb\n  ~5\n"), "a \\\nb \\\n-   |~5\n");
+    }
+
+    #[test]
+    fn duration_list() {
+        assert_eq!(
+            plain_to_typ(
+                "音楽  30
+Ф串Ф  100"
+            ),
+            "- 音楽  |30
+- Ф串Ф  |100
+"
+        );
+
+        assert_eq!(
+            plain_to_typ(
+                "音楽  30\r
+Ф串Ф  100"
+            ),
+            "- 音楽  |30
+- Ф串Ф  |100
+"
+        );
     }
 }

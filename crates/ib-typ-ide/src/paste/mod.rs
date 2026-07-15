@@ -51,6 +51,8 @@ impl PasteEditProvider {
         PasteEditKind::IB_KINDS.into()
     }
 
+    /// - `text`
+    ///   - May contain `\r\n` even `files.eol` is `\n`.
     pub fn provide_edits(&self, text: &str) -> Vec<PasteEdit> {
         let mut edits = Vec::new();
 
